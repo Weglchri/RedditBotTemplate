@@ -1,6 +1,8 @@
 #!/usr/bin/python
+
 import praw
 import time
+import json
 
 reddit = praw.Reddit('bot1')
 
@@ -8,49 +10,55 @@ reddit = praw.Reddit('bot1')
 subreddit = reddit.subreddit('testingground4bots')
 start_time = time.time()
 
-
-#define what the bot should say
-reply_message = "Super important message \n --- \n Posted by bot template \n\n Change this to ... \n\n -- !jep-Bot"
-response = reply_message
 #define what the bot should isten to, to not use the default matcher keyword
 matcher = "!jep"
 
-print(reddit.user.me())
+print("Welcome " + str(reddit.user.me()) + ", bot has been started sucsessfully!")
 
 
-class validator:
-    
-    def __init__(self):
-        self.valid = False
-        
-    def validateIfBotReplied(self, comment):
-        pass
-#        print("Validator called")
+#optional validator class
+#class Validator:
+#    
+#    def __init__(self):
+#        self.valid = False
 #        
+#    def validateIfBotReplied(self, comment):
+#        pass
+#        print("Validator called")
 #        for reply in comment.replies:
 #            print("Entered Replies")
 #            print("Reply: ", reply)
 #            #check if already responded
-#            self.valid = True
-#            
+#            self.valid = True 
 #        return self.valid
     
     
-#only for test system
-test_sub_matcher = "testground"
+#optional json parser class   
+class JSONParser:
+    
+    def __init__(self):
+        with open('responses.json', 'r') as fileText:
+            self.responses = json.load(fileText)
+            
+    def getAllResponses(self):
+        return self.responses
+
+    def getFirstResponse(self):
+        return self.getAllResponses()['responses'][1]['response']
+    
+    
 
 for comment in subreddit.stream.comments():
     if comment.created_utc > start_time:
-        print("Comment: ", comment.body)
         if comment.body == matcher:
-#            if validator().validateIfBotReplied(comment):
-                print("Posted Answer!")
-                #comment.reply(reply_message)
-                #comment.refresh()
+            comment.reply(JSONParser().getFirstResponse())
+            comment.refresh()
 
 
 
-#---not planned for submissions---
+#only for test system
+#test_sub_matcher = "testground"
+#---sumbmission related bot actions---
 #for submission in subreddit.stream.submissions():
 #    #just for testing purpouses
 #    if submission.title == test_sub_matcher:
